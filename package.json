@@ -1,0 +1,26 @@
+{
+  "name": "whisper-node",
+  "version": "0.0.1",
+  "description": "Standalone whisper node",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha -r ts-node/register test/*"
+  },
+  "author": "Lsaether",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "@types/secp256k1": "^3.5.0",
+    "chai": "^4.1.2",
+    "crypto": "^1.0.1",
+    "mocha": "^5.2.0",
+    "safe-buffer": "^5.1.2",
+    "secp256k1": "^3.5.0",
+    "ts-node": "7.0.0",
+    "typescript": "2.9.2"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.1.4",
+    "@types/mocha": "^5.2.4",
+    "@types/node": "^10.5.2"
+  }
+}
