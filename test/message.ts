@@ -1,6 +1,23 @@
 import { expect } from 'chai';
+import crypto, { randomBytes } from 'crypto';
+import { Buffer as SafeBuffer } from 'safe-buffer';
+import secp256k1 from 'secp256k1';
 
-import { MessageParams } from '../src/message';
+import { MessageParams, SentMessage } from '../src/message';
+import { randBytes, toSafeBuffer, toUnsafeBuffer } from '../src/util';
+
+const generateKey = (): SafeBuffer => {
+  let privKey;
+  do {
+    privKey = randomBytes(32);
+  } while (!secp256k1.privateKeyVerify(privKey))
+
+  return toSafeBuffer(privKey);
+}
+
+const toPubKey = (privKey: SafeBuffer): SafeBuffer => {
+  return toSafeBuffer(secp256k1.publicKeyCreate(toUnsafeBuffer(privKey)));
+}
 
 describe('Message', () => {
 
@@ -9,16 +26,29 @@ describe('Message', () => {
       pow: 0.01,
       workTime: 1,
       ttl: 60,
-      payload: Buffer.alloc(12).toString('hex'),
-      keySym: Buffer.alloc(32).toString('hex'),
-      topic: Buffer.alloc(4).toString('hex'),
-      src: Buffer.alloc(64).toString('hex'),
+      payload: randBytes(12),
+      keySym: randBytes(32),
+      topic: randBytes(4),
+      src: generateKey(),
     }
   }
 
-  it('single message test', async () => {
+  const singleMessageTest = (symmetric: boolean) => {
     const params = generateMessageParams();
-    
+    const key = generateKey();
+
+    if (!symmetric) {
+      params.keySym = SafeBuffer.alloc(0);
+      params.dst = toPubKey(key);
+    }
+
+    const msg = new SentMessage(params);
+    // const envelope = msg.wrap(params);
+  }
+
+  it('single message test', async () => {
+
+
   })
 
 })

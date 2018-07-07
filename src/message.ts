@@ -1,6 +1,8 @@
 import crypto, { randomBytes } from 'crypto';
 import secp256k1 from 'secp256k1';
 
+import { Buffer as SafeBuffer } from 'safe-buffer';
+
 import { TopicType } from './topic';
 
 import { WhisperParams } from './doc';
@@ -11,8 +13,8 @@ import { WhisperParams } from './doc';
 // crypto.createCipheriv('aes-128-ctr', )
 
 //TMP
-type PrivateKey = Buffer;
-type PublicKey = Buffer;
+type PrivateKey = SafeBuffer;
+type PublicKey = SafeBuffer;
 
 // MessageParams specifies the exact way a message should be 
 // wrapped into an Envelope.
@@ -20,17 +22,43 @@ export interface MessageParams {
   ttl: number,
   src: PrivateKey, //todo
   dst?: PublicKey, //todo
-  keySym: string, //todo
+  keySym: SafeBuffer, //todo
   topic: TopicType,
   workTime: number,
   pow: number,
-  payload: string,
-  padding?: string,
+  payload: SafeBuffer,
+  padding?: SafeBuffer,
 }
 
 //TODO
-export interface SentMessage {
-  raw: string;
+export class SentMessage {
+  raw: SafeBuffer;
+
+  constructor(params: MessageParams) {
+    const payloadSizeFieldMaxSize = 4;
+    const rawBuf = SafeBuffer.alloc(1 + payloadSizeFieldMaxSize + params.payload.length + params.padding!.length + WhisperParams.signatureLength + WhisperParams.padSizeLimit);
+    this.raw = rawBuf;
+    this.addPayloadSizeField(params.payload);
+    this.appendPadding(params);
+  }
+
+  addPayloadSizeField(payload: SafeBuffer) {
+    const fieldSize = this.getSizeOfPayloadSizeField(payload);
+    const field = SafeBuffer.alloc(4);
+
+  }
+
+  getSizeOfPayloadSizeField(payload: SafeBuffer): number {
+    let size = 1;
+    for (let i = payload.length; i >= 256; i /= 256) {
+      size++;
+    }
+    return size;
+  }
+
+  appendPadding(params: MessageParams) {
+
+  }
 }
 
 // Sent message represents a data packet to be received through
@@ -68,10 +96,10 @@ export const isAsymmetricEncryption = (msg: ReceivedMessage): boolean => {
 
 // NewSentMessage creates and initializes a non-sgined, non-encrypted
 // Whisper message.
-export const newSentMessage = (params: MessageParams): any => {
-  const payloadSizeFieldMaxSize = 4;
-  const msg = { raw: null };
-  msg.raw = '1' + '1' + '4' + params.payload.length.toString() + params.padding.length.toString() + '65' + '255';
-  //todo
-}
+// export const newSentMessage = (params: MessageParams): any => {
+//   const payloadSizeFieldMaxSize = 4;
+//   const rawBuf = SafeBuffer.alloc(1 + payloadSizeFieldMaxSize + params.payload.length + params.padding!.length + WhisperParams.signatureLength + WhisperParams.padSizeLimit);
+//   const msg = new SentMessage(rawBuf);
+//   msg.addPayloadSizeField(params.payload);
+// }
 
