@@ -2,7 +2,7 @@ import { Buffer as SafeBuffer } from 'safe-buffer';
 
 import { TopicType } from "./topic";
 import { WhisperParams } from './doc';
-import { SentMessage, MessageParams } from './message';
+import { SentMessage, MessageParams, ReceivedMessage } from './message';
 import { keccak256 } from './util';
 
 
@@ -72,5 +72,25 @@ export default class Envelope {
     }
     return this.hash;
   }
+
+  //todo
+  decodeRLP(s: any) {
+    const raw = s.raw;
+
+  }
+
+  openAsymmetric(privKey: SafeBuffer): ReceivedMessage {
+    const message = { raw: this.data };
+    message.decryptAsymmetric(privKey);
+    return message;
+  }
+
+  openSymmetric(key: SafeBuffer): ReceivedMessage {
+    const message = { raw: this.data };
+    message.decryptSymmetric(key);
+    return message;
+  }
+
+  
 
 }
