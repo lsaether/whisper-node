@@ -4,7 +4,7 @@
   "description": "Standalone whisper node",
   "main": "index.js",
   "scripts": {
-    "test": "mocha -r ts-node/register test/*"
+    "test": "mocha -r ts-node/register test/ecies/*"
   },
   "author": "Lsaether",
   "license": "GPL-3.0",
@@ -14,6 +14,7 @@
     "crypto": "^1.0.1",
     "keccak": "^1.4.0",
     "mocha": "^5.2.0",
+    "rlp-encoding": "^3.0.0",
     "safe-buffer": "^5.1.2",
     "secp256k1": "^3.5.0",
     "ts-node": "7.0.0",
