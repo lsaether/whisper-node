@@ -1,6 +1,8 @@
 import crypto, { randomBytes } from 'crypto';
 import secp256k1 from 'secp256k1';
 
+import ECIES, { id2pk, pk2id } from './ecies';
+
 // import { Buffer as SafeBuffer } from 'safe-buffer';
 
 import { TopicType } from './topic';
@@ -65,6 +67,7 @@ export class SentMessage {
     if (!secp256k1.publicKeyVerify(key)) {
       throw `Invalid public provided.`;
     }
+
 
     // secp256k1.ecdh()
   }
