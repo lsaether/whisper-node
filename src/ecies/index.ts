@@ -1,13 +1,13 @@
-import crypto, { randomBytes } from 'crypto';
-import secp256k1 from 'secp256k1';
-import rlp from 'rlp-encoding';
-
+import crypto, { randomBytes } from "crypto";
+import rlp from "rlp-encoding";
+import secp256k1 from "secp256k1";
 
 const ecdhX = (pubKey: Buffer, privKey: Buffer) => {
   return secp256k1.ecdhUnsafe(pubKey, privKey, true).slice(1);
-}
+};
 
-// Ripped from https://github.com/ethereumjs/ethereumjs-devp2p/blob/630adf262c0c671ad7c6cf17bb0d5b4a89b76415/src/rlpx/ecies.js#L13
+// Ripped from
+// https://github.com/ethereumjs/ethereumjs-devp2p/blob/630adf262c0c671ad7c6cf17bb0d5b4a89b76415/src/rlpx/ecies.js#L13
 const concatKDF = (keyMaterial: any, keyLength: any): Buffer => {
   const SHA256BlockSize = 64;
   const reps = ((keyLength + 7) * 8) / (SHA256BlockSize * 8);
@@ -16,11 +16,11 @@ const concatKDF = (keyMaterial: any, keyLength: any): Buffer => {
   for (let counter = 0, tmp = Buffer.allocUnsafe(4); counter <= reps;) {
     counter += 1;
     tmp.writeInt32BE(counter, 0);
-    buffers.push(crypto.createHash('sha256').update(tmp).update(keyMaterial).digest());
+    buffers.push(crypto.createHash("sha256").update(tmp).update(keyMaterial).digest());
   }
 
   return Buffer.concat(buffers).slice(0, keyLength);
-}
+};
 
 /** From Utils */
 
@@ -29,11 +29,11 @@ export const pk2id = (pk: Buffer): Buffer => {
     pk = secp256k1.publicKeyConvert(pk, false);
   }
   return pk.slice(1);
-}
+};
 
-export const id2pk= (id: Buffer): Buffer => {
+export const id2pk = (id: Buffer): Buffer => {
   return Buffer.concat([Buffer.from([0x04]), id]);
-}
+};
 
 export const genPrivKey = (): Buffer => {
   let privKey;
@@ -42,7 +42,7 @@ export const genPrivKey = (): Buffer => {
   } while (!secp256k1.privateKeyVerify(privKey));
 
   return privKey;
-}
+};
 
 /** End from utils */
 
@@ -59,16 +59,16 @@ export default class ECIES {
 
   }
 
-  _encryptMessage(data: any, sharedMacData?: any): Buffer {
+  public _encryptMessage(data: any, sharedMacData?: any): Buffer {
     const privateKey = genPrivKey();
     const x = ecdhX(this._remotePublicKey, privateKey);
     const key = concatKDF(x, 32);
     const ekey = key.slice(0, 16); // encryption key
-    const mkey = crypto.createHash('sha256').update(key.slice(16, 32)).digest(); // MAC key
+    const mkey = crypto.createHash("sha256").update(key.slice(16, 32)).digest(); // MAC key
 
     // encrypt
     const IV = randomBytes(16);
-    const cipher = crypto.createCipheriv('aes-128-ctr', ekey, IV);
+    const cipher = crypto.createCipheriv("aes-128-ctr", ekey, IV);
     const encryptedData = cipher.update(data);
     const dataIV = Buffer.concat([IV, encryptedData]);
 
@@ -76,21 +76,21 @@ export default class ECIES {
     if (!sharedMacData) {
       sharedMacData = Buffer.from([]);
     }
-    const tag = crypto.createHmac('sha256', mkey).update(
-      Buffer.concat([dataIV, sharedMacData])
+    const tag = crypto.createHmac("sha256", mkey).update(
+      Buffer.concat([dataIV, sharedMacData]),
     ).digest();
 
     const publicKey = secp256k1.publicKeyCreate(privateKey, false);
-    
+
     return Buffer.concat([
-      publicKey, dataIV, tag
+      publicKey, dataIV, tag,
     ]);
   }
 
-  _decryptMessage(data: Buffer, sharedMacData?: any): Buffer {
-    const correctHeader = data.slice(0, 1).equals(Buffer.from('04', 'hex'));
+  public _decryptMessage(data: Buffer, sharedMacData?: any): Buffer {
+    const correctHeader = data.slice(0, 1).equals(Buffer.from("04", "hex"));
     if (!correctHeader) {
-      throw `Wrong ECIES header (possible cause: EIP8 upgrade)`;
+      throw new Error(`Wrong ECIES header (possible cause: EIP8 upgrade)`);
     }
 
     const publicKey = data.slice(0, 65);
@@ -101,28 +101,28 @@ export default class ECIES {
     const x = ecdhX(publicKey, this._privateKey);
     const key = concatKDF(x, 32);
     const ekey = key.slice(0, 16);
-    const mkey = crypto.createHash('sha256').update(
-      key.slice(16, 32)
+    const mkey = crypto.createHash("sha256").update(
+      key.slice(16, 32),
     ).digest();
 
     // check the tag
     if (!sharedMacData) {
       sharedMacData = Buffer.from([]);
     }
-    const _tag = crypto.createHmac('sha256', mkey).update(
-      Buffer.concat([dataIV, sharedMacData])
+    const _tag = crypto.createHmac("sha256", mkey).update(
+      Buffer.concat([dataIV, sharedMacData]),
     ).digest();
 
     const validTag = _tag.equals(tag);
     if (!validTag) {
-      throw `Invalid tag.`;
+      throw new Error(`Invalid tag.`);
     }
 
     // decrypt data
     const IV = dataIV.slice(0, 16);
     const encryptedData = dataIV.slice(16);
     const decipher = crypto.createDecipheriv(
-      'aes-128-ctr', ekey, IV
+      "aes-128-ctr", ekey, IV,
     );
 
     return decipher.update(encryptedData);

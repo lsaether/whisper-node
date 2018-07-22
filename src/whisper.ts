@@ -1,8 +1,7 @@
 
+import { WhisperParams } from "./doc";
 
-import { WhisperParams } from './doc';
-
-import Config, { defaultConfig } from './config';
+import Config, { defaultConfig } from "./config";
 
 interface Statistics {
   messagesCleared: number;
@@ -19,54 +18,50 @@ interface Settings {
   overflowIdx: boolean;
 }
 
-
 // Whisper is a dark communication interface through the Ethereum network
 // using its own p2p communication layer.
 export default class Whisper {
-  protocol: any; //todo: Libp2p?
-  filters: any; //todo // Message filters installed with Subscribe
+  public protocol: any; // todo: Libp2p?
+  public filters: any; // todo // Message filters installed with Subscribe
 
-  privateKeys: any;
-  symKeys: any;
-  keyMu: any;
+  public privateKeys: any;
+  public symKeys: any;
+  public keyMu: any;
 
-  peerMu: any;
-  peers: any;
+  public peerMu: any;
+  public peers: any;
 
-  messageQueue: any;
-  p2pMsgQueue: any;
-  quit: any;
+  public messageQueue: any;
+  public p2pMsgQueue: any;
+  public quit: any;
 
-  settings: Settings;
+  public settings: Settings;
 
-  syncAllowance: any;
+  public syncAllowance: any;
 
-  lightClient: boolean;
+  public lightClient: boolean;
 
-  statsMu: any;
-  stats: Statistics;
+  public statsMu: any;
+  public stats: Statistics;
 
-  mailServer: any;
+  public mailServer: any;
 
   constructor(config: Config = defaultConfig) {
-    
+
   }
 
-  minPoW(): number {
+  public minPoW(): number {
     return this.settings.minPoWIdx;
   }
 
-  minPoWTolerance(): number {
+  public minPoWTolerance(): number {
     return this.settings.minPoWToleranceIdx;
   }
 
-  start() {
+  public start() {
     console.log(`Started Whisper V${WhisperParams.protocolVersionString}`);
     // this.update();
 
-    
   }
 
 }
-
-

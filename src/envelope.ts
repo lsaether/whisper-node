@@ -1,36 +1,25 @@
-import { Buffer as SafeBuffer } from 'safe-buffer'; 
+import { Buffer as SafeBuffer } from "safe-buffer";
 
+import { WhisperParams } from "./doc";
+import { MessageParams, ReceivedMessage, SentMessage } from "./message";
 import { TopicType } from "./topic";
-import { WhisperParams } from './doc';
-import { SentMessage, MessageParams, ReceivedMessage } from './message';
-import { keccak256 } from './util';
-
+import { keccak256 } from "./util";
 
 /**
  * Envelope represents a clear-text data packet to transmit through the
  * Whisper network. Its contents may or may not be encrypted and signed.
  */
 export default class Envelope {
-  expiry: number;
-  ttl: number;
-  topic: TopicType;
-  data: SafeBuffer;
-  nonce: number;
+  public expiry: number;
+  public ttl: number;
+  public topic: TopicType;
+  public data: SafeBuffer;
+  public nonce: number;
 
-  pow: number; // Message specific PoW as described in Whisper spec.
+  public pow: number; // Message specific PoW as described in Whisper spec.
 
-  hash: SafeBuffer;
-  bloom: SafeBuffer;
-
-
-  size(): number {
-    return WhisperParams.envelopeHeaderLength + this.data.length;
-  }
-
-  rlpWithoutNonce(): SafeBuffer {
-    //todo
-    return SafeBuffer.alloc(0);
-  }
+  public hash: SafeBuffer;
+  public bloom: SafeBuffer;
 
   // Creates an Envelope which wraps a Whisper message with expiration
   // and destination data included for network forwading.
@@ -42,30 +31,39 @@ export default class Envelope {
     this.nonce = 0;
   }
 
+  public size(): number {
+    return WhisperParams.envelopeHeaderLength + this.data.length;
+  }
+
+  public rlpWithoutNonce(): SafeBuffer {
+    // todo
+    return SafeBuffer.alloc(0);
+  }
+
   // Seal closes the envelope by spending the requested amount of time
   // as a proof of work on hashing the data.
-  seal(options: MessageParams) {
+  public seal(options: MessageParams) {
     if (options.pow === 0) {
       return;
     }
 
-    //todo
+    // todo
   }
 
-  getPoW(): number {
+  public getPoW(): number {
     if (this.pow === 0) {
       this.calculatePoW(0);
     }
     return this.pow;
   }
 
-  calculatePoW(diff: number) {
-    let buf = SafeBuffer.alloc(64);
-    let hash = keccak256(this.rlpWithoutNonce());
-    
+  public calculatePoW(diff: number) {
+    const buf = SafeBuffer.alloc(64);
+    const hash = keccak256(this.rlpWithoutNonce());
+
   }
 
-  getHash(): SafeBuffer {
+  public getHash(): SafeBuffer {
     if (this.hash === SafeBuffer.alloc(0)) {
       const encoded = rlp.encodeToBytes(this);
       this.hash = keccak256(encoded);
@@ -73,24 +71,22 @@ export default class Envelope {
     return this.hash;
   }
 
-  //todo
-  decodeRLP(s: any) {
+  // todo
+  public decodeRLP(s: any) {
     const raw = s.raw;
 
   }
 
-  openAsymmetric(privKey: SafeBuffer): ReceivedMessage {
+  public openAsymmetric(privKey: SafeBuffer): ReceivedMessage {
     const message = { raw: this.data };
     message.decryptAsymmetric(privKey);
     return message;
   }
 
-  openSymmetric(key: SafeBuffer): ReceivedMessage {
+  public openSymmetric(key: SafeBuffer): ReceivedMessage {
     const message = { raw: this.data };
     message.decryptSymmetric(key);
     return message;
   }
-
-  
 
 }

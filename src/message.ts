@@ -1,36 +1,36 @@
-import crypto, { randomBytes } from 'crypto';
-import secp256k1 from 'secp256k1';
+import crypto, { randomBytes } from "crypto";
+import secp256k1 from "secp256k1";
 
-import ECIES, { id2pk, pk2id } from './ecies';
+import ECIES, { id2pk, pk2id } from "./ecies";
 
 // import { Buffer as SafeBuffer } from 'safe-buffer';
 
-import { TopicType } from './topic';
+import { TopicType } from "./topic";
 
-import { WhisperParams } from './doc';
-import Envelope from './envelope';
+import { WhisperParams } from "./doc";
+import Envelope from "./envelope";
 
 // const r = randomBytes(32);
 // secp256k1.privateKeyVerify(r);
 
 // crypto.createCipheriv('aes-128-ctr', )
 
-//TMP
+// TMP
 type PrivateKey = Buffer;
 type PublicKey = Buffer;
 
-// MessageParams specifies the exact way a message should be 
+// MessageParams specifies the exact way a message should be
 // wrapped into an Envelope.
 export interface MessageParams {
-  ttl: number,
-  src: PrivateKey, //todo
-  dst?: PublicKey, //todo
-  keySym: Buffer, //todo
-  topic: TopicType,
-  workTime: number,
-  pow: number,
-  payload: Buffer,
-  padding?: Buffer,
+  ttl: number;
+  src: PrivateKey; // todo
+  dst?: PublicKey; // todo
+  keySym: Buffer; // todo
+  topic: TopicType;
+  workTime: number;
+  pow: number;
+  payload: Buffer;
+  padding?: Buffer;
 }
 
 export class WhisperUser {
@@ -40,29 +40,29 @@ export class WhisperUser {
     this._privateKey = pk;
   }
 
-  encryptMessageAsymmetric(msg: SentMessage, remoteId: Buffer): Buffer {
+  public encryptMessageAsymmetric(msg: SentMessage, remoteId: Buffer): Buffer {
     const ecies = new ECIES(this._privateKey, remoteId);
     const encryptedMsg = ecies._decryptMessage(msg.raw);
     return encryptedMsg;
   }
 
   // Encrypts a message with a topic key, using AES-GCM-256.
-  encryptMessageSymmetric(msg: SentMessage, topicKey: Buffer): Buffer {
+  public encryptMessageSymmetric(msg: SentMessage, topicKey: Buffer): Buffer {
     if (topicKey.length != WhisperParams.aesKeyLength) {
-      throw `Invalid key size for symmetric encryption!`;
+      throw new Error(`Invalid key size for symmetric encryption!`);
     }
 
-    const iv = '';
-    const cipher = crypto.createCipheriv('aes-256-gcm', topicKey, iv);
+    const iv = "";
+    const cipher = crypto.createCipheriv("aes-256-gcm", topicKey, iv);
     cipher.update(msg.raw);
     const encrypted = cipher.final();
     return encrypted;
   }
 }
 
-//TODO
+// TODO
 export class SentMessage {
-  raw: Buffer;
+  public raw: Buffer;
 
   constructor(params: MessageParams) {
     const payloadSizeFieldMaxSize = 4;
@@ -72,13 +72,13 @@ export class SentMessage {
     this.appendPadding(params);
   }
 
-  addPayloadSizeField(payload: Buffer) {
+  public addPayloadSizeField(payload: Buffer) {
     const fieldSize = this.getSizeOfPayloadSizeField(payload);
     const field = Buffer.alloc(4);
 
   }
 
-  getSizeOfPayloadSizeField(payload: Buffer): number {
+  public getSizeOfPayloadSizeField(payload: Buffer): number {
     let size = 1;
     for (let i = payload.length; i >= 256; i /= 256) {
       size++;
@@ -86,23 +86,21 @@ export class SentMessage {
     return size;
   }
 
-  appendPadding(params: MessageParams) {}
+  public appendPadding(params: MessageParams) {}
 
-  sign(key: Buffer) {}
+  public sign(key: Buffer) {}
 
-  encryptAsymmetric(remotePubKey: PublicKey) {
+  public encryptAsymmetric(remotePubKey: PublicKey) {
     if (!secp256k1.publicKeyVerify(key)) {
-      throw `Invalid public provided.`;
+      throw new Error(`Invalid public provided.`);
     }
-
-
 
     // secp256k1.ecdh()
   }
 
-  encryptSymmetric(key: Buffer) {}
+  public encryptSymmetric(key: Buffer) {}
 
-  wrap(options: MessageParams): Envelope {
+  public wrap(options: MessageParams): Envelope {
     if (options.ttl === 0) {
       options.ttl = WhisperParams.defaultTTL;
     }
@@ -114,12 +112,12 @@ export class SentMessage {
     } else if (options.keySym) {
       this.encryptSymmetric(options.keySym);
     } else {
-      throw `Unable to encrypt message. Neither an asymmetric key nor a symmetric key was provided.`;
+      throw new Error(`Unable to encrypt message. Neither an asymmetric key nor a symmetric key was provided.`);
     }
 
     const envelope = new Envelope(options.ttl, options.topic, this);
     envelope.seal(options);
-    
+
     return envelope;
   }
 }
@@ -127,35 +125,35 @@ export class SentMessage {
 // Sent message represents a data packet to be received through
 // the Whisper protocol and successfully decrypted.
 export class  ReceivedMessage {
-  raw: Buffer;
+  public raw: Buffer;
 
-  payload: string;
-  padding?: string;
-  signature?: string;
-  salt: Buffer;
+  public payload: string;
+  public padding?: string;
+  public signature?: string;
+  public salt: Buffer;
 
-  pow: number;
-  sent: number;
-  ttl: number;
-  src: PublicKey;
-  dst?: PublicKey;
-  topic: TopicType;
+  public pow: number;
+  public sent: number;
+  public ttl: number;
+  public src: PublicKey;
+  public dst?: PublicKey;
+  public topic: TopicType;
 
-  symKeyHash: string; //todo
-  envelopeHash: string; //todo
+  public symKeyHash: string; // todo
+  public envelopeHash: string; // todo
 
-  decryptSymmetric(key: Buffer) {
+  public decryptSymmetric(key: Buffer) {
     // symmetric messages are expected to contain the 12-byte
     // nonce at the end
     if (this.raw.length < WhisperParams.aesNonceLength) {
-      throw `Missing salt or invalid payload in symmetric message.`;
+      throw new Error(`Missing salt or invalid payload in symmetric message.`);
     }
 
     let salt: Buffer;
     this.raw.copy(salt, 0, this.raw.length - WhisperParams.aesNonceLength);
 
     // const iv = '';
-    const decipher = crypto.createDecipher('aes-256-gcm', key);
+    const decipher = crypto.createDecipher("aes-256-gcm", key);
     const decrypted = decipher.update(Buffer.concat([salt, this.raw.slice(0, this.raw.length - WhisperParams.aesNonceLength)]));
     this.raw = decrypted;
     this.salt = salt;
@@ -164,15 +162,15 @@ export class  ReceivedMessage {
 
 export const isMessageSigned = (flags: number): boolean => {
   return (flags & WhisperParams.signatureFlag) !== 0;
-}
+};
 
 export const isSymmetricEncryption = (msg: ReceivedMessage): boolean => {
-  return msg.symKeyHash != null; //todo
-}
+  return msg.symKeyHash != null; // todo
+};
 
 export const isAsymmetricEncryption = (msg: ReceivedMessage): boolean => {
-  return msg.dst != null; //tood
-}
+  return msg.dst != null; // tood
+};
 
 // NewSentMessage creates and initializes a non-sgined, non-encrypted
 // Whisper message.
@@ -182,4 +180,3 @@ export const isAsymmetricEncryption = (msg: ReceivedMessage): boolean => {
 //   const msg = new SentMessage(rawBuf);
 //   msg.addPayloadSizeField(params.payload);
 // }
-
