@@ -3,6 +3,10 @@ import { WhisperParams } from "./doc";
 
 import Config, { defaultConfig } from "./config";
 
+import { generatePrivateKey } from "./util";
+
+import { randomBytes } from "crypto";
+
 interface IStatistics {
   messagesCleared: number;
   memoryCleared: number;
@@ -18,13 +22,18 @@ interface ISettings {
   overflowIdx: boolean;
 }
 
+const generateRandomId = (): string => {
+  const randBuf = randomBytes(WhisperParams.keyIDSize);
+  return randBuf.toString("hex");
+};
+
 // Whisper is a dark communication interface through the Ethereum network
 // using its own p2p communication layer.
 export default class Whisper {
   public protocol: any; // todo: Libp2p?
   public filters: any; // todo // Message filters installed with Subscribe
 
-  public privateKeys: any;
+  public privateKeys: {};
   public symKeys: any;
   public keyMu: any;
 
@@ -49,6 +58,17 @@ export default class Whisper {
   public maxMessageSize: any;
 
   constructor(config: Config = defaultConfig) {}
+
+  /* newKeyPair generates a new cryptographic identity for the client. */
+  public newKeyPair(): string {
+    const pk = generatePrivateKey();
+    const id = generateRandomId();
+    if (this.privateKeys[id]) {
+      throw new Error("Failed to generate unique Id");
+    }
+    this.privateKeys[id] = pk;
+    return id;
+  }
 
   public minPoW(): number {
     return this.settings.minPoWIdx;

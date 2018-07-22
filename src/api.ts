@@ -49,4 +49,7 @@ export default class PublicWhisperAPI {
     return true;
   }
 
+  public newKeyPair(): Buffer {
+    return this.whisper.newKeyPair();
+  }
 }

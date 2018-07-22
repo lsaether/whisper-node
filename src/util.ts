@@ -1,6 +1,7 @@
 import { randomBytes } from "crypto";
 import createKeccakHash from "keccak";
 import { Buffer as SafeBuffer } from "safe-buffer";
+import secp256k1 from "secp256k1";
 
 // Since crypto package uses the nodejs Buffer type which is
 // incompatible with the safe-buffer implementation we need
@@ -21,6 +22,15 @@ export const toUnsafeBuffer = (buf: SafeBuffer): Buffer => {
 export const toSafeBuffer = (buf: Buffer): SafeBuffer => {
   return SafeBuffer.from(buf.toString("hex"), "hex");
 };
+
+export const generatePrivateKey = (): Buffer => {
+  let pk;
+  do {
+    pk = randomBytes(32);
+  } while (!secp256k1.privateKeyVerify(pk));
+
+  return pk;
+}
 
 /* tslint:disable */
 console.log(keccak256(SafeBuffer.from("hello world")));
