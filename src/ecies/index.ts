@@ -52,9 +52,9 @@ export default class ECIES {
   private _publicKey: Buffer;
   private _remotePublicKey: Buffer;
 
-  constructor(privKey: Buffer, id: Buffer, remoteId: Buffer) {
+  constructor(privKey: Buffer, remoteId: Buffer) {
     this._privateKey = privKey;
-    this._publicKey = id2pk(id);
+    // this._publicKey = id2pk(id);
     this._remotePublicKey = id2pk(remoteId);
 
   }

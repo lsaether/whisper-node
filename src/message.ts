@@ -33,6 +33,33 @@ export interface MessageParams {
   padding?: Buffer,
 }
 
+export class WhisperUser {
+  private _privateKey: Buffer;
+
+  constructor(pk: Buffer) {
+    this._privateKey = pk;
+  }
+
+  encryptMessageAsymmetric(msg: SentMessage, remoteId: Buffer): Buffer {
+    const ecies = new ECIES(this._privateKey, remoteId);
+    const encryptedMsg = ecies._decryptMessage(msg.raw);
+    return encryptedMsg;
+  }
+
+  // Encrypts a message with a topic key, using AES-GCM-256.
+  encryptMessageSymmetric(msg: SentMessage, topicKey: Buffer): Buffer {
+    if (topicKey.length != WhisperParams.aesKeyLength) {
+      throw `Invalid key size for symmetric encryption!`;
+    }
+
+    const iv = '';
+    const cipher = crypto.createCipheriv('aes-256-gcm', topicKey, iv);
+    cipher.update(msg.raw);
+    const encrypted = cipher.final();
+    return encrypted;
+  }
+}
+
 //TODO
 export class SentMessage {
   raw: Buffer;
@@ -63,10 +90,11 @@ export class SentMessage {
 
   sign(key: Buffer) {}
 
-  encryptAsymmetric(key: PublicKey) {
+  encryptAsymmetric(remotePubKey: PublicKey) {
     if (!secp256k1.publicKeyVerify(key)) {
       throw `Invalid public provided.`;
     }
+
 
 
     // secp256k1.ecdh()

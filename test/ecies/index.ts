@@ -18,7 +18,7 @@ describe('ECIES', () => {
     const remotePubKey = secp256k1.publicKeyCreate(privKey, true);
     const remoteId = pk2id(remotePubKey);
  
-    const ecies = new ECIES(privKey, id, remoteId);
+    const ecies = new ECIES(privKey, remoteId);
 
     const data = genPrivKey();
     // console.log(data.toString('hex'));
@@ -28,7 +28,7 @@ describe('ECIES', () => {
     // console.log(encrypted.toString('hex'));
     // console.log('\n');
 
-    const ecies2 = new ECIES(remotePrivKey, remoteId, id);
+    const ecies2 = new ECIES(remotePrivKey, id);
     const decrypted = ecies._decryptMessage(encrypted);
     // console.log(decrypted.toString('hex'));
 
