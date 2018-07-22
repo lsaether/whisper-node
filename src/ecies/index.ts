@@ -46,6 +46,8 @@ export const genPrivKey = (): Buffer => {
 
 /** End from utils */
 
+/* tslint:disable */
+
 // Elliptic Curve Integrated Encryption Scheme
 export default class ECIES {
   private _privateKey: Buffer;

@@ -22,5 +22,6 @@ export const toSafeBuffer = (buf: Buffer): SafeBuffer => {
   return SafeBuffer.from(buf.toString("hex"), "hex");
 };
 
+/* tslint:disable */
 console.log(keccak256(SafeBuffer.from("hello world")));
 console.log(createKeccakHash("keccak256").update(Buffer.from("hello world")).digest());

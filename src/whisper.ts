@@ -46,6 +46,8 @@ export default class Whisper {
 
   public mailServer: any;
 
+  public maxMessageSize: any;
+
   constructor(config: Config = defaultConfig) {}
 
   public minPoW(): number {
@@ -56,7 +58,20 @@ export default class Whisper {
     return this.settings.minPoWToleranceIdx;
   }
 
+  public setBloomFilter(bloom: Buffer): boolean {
+    return true;
+  }
+
+  public setMaxMessageSize(size: number): boolean {
+    return true;
+  }
+
+  public setMinPoW(pow: number): boolean {
+    return true;
+  }
+
   public start() {
+    /* tslint:disable-next-line */
     console.log(`Started Whisper V${WhisperParams.protocolVersionString}`);
     // this.update();
 

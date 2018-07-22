@@ -1,4 +1,4 @@
-
+/* tslint:disable */
 export const WhisperParams = {
   protocolName: "shh",
   protocolVersion: 6,

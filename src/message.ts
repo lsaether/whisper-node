@@ -21,7 +21,7 @@ type PublicKey = Buffer;
 
 // MessageParams specifies the exact way a message should be
 // wrapped into an Envelope.
-export interface MessageParams {
+export interface IMessageParams {
   ttl: number;
   src: PrivateKey; // todo
   dst?: PublicKey; // todo
@@ -42,13 +42,13 @@ export class WhisperUser {
 
   public encryptMessageAsymmetric(msg: SentMessage, remoteId: Buffer): Buffer {
     const ecies = new ECIES(this._privateKey, remoteId);
-    const encryptedMsg = ecies._decryptMessage(msg.raw);
+    const encryptedMsg = ecies._encryptMessage(msg.raw);
     return encryptedMsg;
   }
 
   // Encrypts a message with a topic key, using AES-GCM-256.
   public encryptMessageSymmetric(msg: SentMessage, topicKey: Buffer): Buffer {
-    if (topicKey.length != WhisperParams.aesKeyLength) {
+    if (topicKey.length !== WhisperParams.aesKeyLength) {
       throw new Error(`Invalid key size for symmetric encryption!`);
     }
 
@@ -61,6 +61,7 @@ export class WhisperUser {
 }
 
 // TODO
+/* tslint:disable */
 export class SentMessage {
   public raw: Buffer;
 
