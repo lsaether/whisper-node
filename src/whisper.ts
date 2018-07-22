@@ -3,7 +3,7 @@ import { WhisperParams } from "./doc";
 
 import Config, { defaultConfig } from "./config";
 
-interface Statistics {
+interface IStatistics {
   messagesCleared: number;
   memoryCleared: number;
   memoryUsed: number;
@@ -11,7 +11,7 @@ interface Statistics {
   totalMessagesCleared: number;
 }
 
-interface Settings {
+interface ISettings {
   minPoWIdx: number;
   minPoWToleranceIdx: number;
   maxMsgSizeIdx: number;
@@ -35,20 +35,18 @@ export default class Whisper {
   public p2pMsgQueue: any;
   public quit: any;
 
-  public settings: Settings;
+  public settings: ISettings;
 
   public syncAllowance: any;
 
   public lightClient: boolean;
 
   public statsMu: any;
-  public stats: Statistics;
+  public stats: IStatistics;
 
   public mailServer: any;
 
-  constructor(config: Config = defaultConfig) {
-
-  }
+  constructor(config: Config = defaultConfig) {}
 
   public minPoW(): number {
     return this.settings.minPoWIdx;
@@ -63,5 +61,7 @@ export default class Whisper {
     // this.update();
 
   }
-
 }
+
+const w = new Whisper();
+w.start();

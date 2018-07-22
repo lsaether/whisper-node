@@ -4,6 +4,9 @@
   "description": "Standalone whisper node",
   "main": "index.js",
   "scripts": {
+    "lint-fix": "tslint -c tslint.json src/**/*.ts",
+    "lint-tests": "tslint -c tslint.json test/**/*.ts",
+    "start": "ts-node src/whisper.ts",
     "test": "mocha -r ts-node/register test/ecies/*"
   },
   "author": "Lsaether",
